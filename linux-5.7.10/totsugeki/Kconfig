@@ -1,0 +1,22 @@
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# Totsugeki configuration
+#
+
+menuconfig TOTSUGEKI
+	bool "Totsugeki Modules"
+    default n
+	select KITCHEN_TIMER
+	---help---
+     My menuconfig.
+
+if TOTSUGEKI
+
+config KITCHEN_TIMER
+	tristate "KITCHEN_TIMER Test Module."
+    default n
+	help
+	  My sample kitchen timer!
+
+endif
+
