@@ -1,2 +1,2 @@
-obj-y := my_syscall.o
-obj-m := my_module.o
+obj-y += my_syscall.o
+obj-$(CONFIG_KITCHEN_TIMER) += my_module.o
