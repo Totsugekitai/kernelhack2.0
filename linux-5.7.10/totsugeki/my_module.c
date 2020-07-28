@@ -39,12 +39,6 @@ static struct kitchen_struct kitchen = {
 void kitchen_timer_alarm(struct timer_list *timer)
 {
     printk("TIMER ALARM!!!\n");
-    //char *argv[] = {"/bin/bash", "-c", "/bin/echo TIMER ALARM!! > /alarm.txt", NULL};
-    //char *envp[] = {"HOME=/", "TERM=linux",
-    //                "PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin", NULL};
-    //if (call_usermodehelper(argv[0], argv, envp, UMH_NO_WAIT)) {
-    //    printk(KERN_ERR "cannot print userland\n");
-    //}
 
     kitchen.start_time = 0;
     kitchen.timer.entry.next = NULL;
@@ -120,6 +114,10 @@ static ssize_t kitchen_timer_write(struct file *filp, const char __user *buf, si
     printk(KERN_INFO "kitchen_timer write start.\n");
 
     char mybuf[20];
+    int i;
+    for (i = 0; i < 20; i++) {
+        mybuf[i] = '\0';
+    }
     long setting_second = 0;
     struct kitchen_struct *k = (struct kitchen_struct *)filp->private_data;
     if (count > 20) {
@@ -132,6 +130,10 @@ static ssize_t kitchen_timer_write(struct file *filp, const char __user *buf, si
     }
 
     printk(KERN_INFO "mybuf: %s\n", mybuf);
+
+    if (mybuf[strlen(mybuf) - 1] == '\n') {
+        mybuf[strlen(mybuf) - 1] = '\0';
+    }
 
     if (kstrtol(mybuf, 0, &setting_second) != 0) {
         printk(KERN_ERR "error: kstrtol() while kitchen_timer_write\n");
