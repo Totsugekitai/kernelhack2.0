@@ -11,14 +11,9 @@ linux:
 > cp $(LINUX)/arch/x86/boot/bzImage $(TOOLS)
 > cp $(LINUX)/vmlinux $(TOOLS)
 
-.PHONY : buildroot
-buildroot:
-> make -C $(BUILDROOT)
-> cp $(BUILDROOT)/output/images/rootfs.ext4 $(TOOLS)
-
 .PHONY : run
 run:
-> qemu-system-x86_64 -enable-kvm -s -kernel $(TOOLS)/bzImage -boot c -m 2049M -hda $(TOOLS)/rootfs.ext4 -append "root=/dev/sda rw console=ttyS0,115200 acpi=off nokaslr" -serial stdio -display none -virtfs local,path=$(SHARE),security_model=none,mount_tag=share
+> qemu-system-x86_64 -enable-kvm -s -kernel $(TOOLS)/bzImage -boot c -m 2049M -hda $(TOOLS)/image.img -append "root=/dev/sda rw console=ttyS0,115200 acpi=off nokaslr" -serial stdio -display none -virtfs local,path=$(SHARE),security_model=none,mount_tag=share
 
 .PHONY : debug
 debug:
