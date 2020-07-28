@@ -3,6 +3,7 @@
 LINUX := linux-5.7.10
 BUILDROOT := buildroot-2020.02.4
 TOOLS := tools
+SHARE := share
 
 .PHONY : linux
 linux:
@@ -17,7 +18,7 @@ buildroot:
 
 .PHONY : run
 run:
-> qemu-system-x86_64 -s -kernel $(TOOLS)/bzImage -boot c -m 2049M -hda $(TOOLS)/rootfs.ext4 -append "root=/dev/sda rw console=ttyS0,115200 acpi=off nokaslr" -serial stdio -display none
+> qemu-system-x86_64 -enable-kvm -s -kernel $(TOOLS)/bzImage -boot c -m 2049M -hda $(TOOLS)/rootfs.ext4 -append "root=/dev/sda rw console=ttyS0,115200 acpi=off nokaslr" -serial stdio -display none -virtfs local,path=$(SHARE),security_model=none,mount_tag=share
 
 .PHONY : debug
 debug:
