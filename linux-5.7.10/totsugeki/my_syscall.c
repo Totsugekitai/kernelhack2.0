@@ -39,8 +39,3 @@ SYSCALL_DEFINE3(hello, const char __user *, readbuf, char __user *, writebuf, un
     return do_sys_hello(readbuf, writebuf, len);
 }
 
-//asmlinkage long sys_hello(void)
-//{
-//    printk("Hello, syscall!!!!\n");
-//    return 0;
-//}
