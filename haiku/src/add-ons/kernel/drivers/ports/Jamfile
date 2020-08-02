@@ -1,4 +1,0 @@
-SubDir HAIKU_TOP src add-ons kernel drivers ports ; 
-
-SubInclude HAIKU_TOP src add-ons kernel drivers ports pc_serial ;
-SubInclude HAIKU_TOP src add-ons kernel drivers ports usb_serial ;

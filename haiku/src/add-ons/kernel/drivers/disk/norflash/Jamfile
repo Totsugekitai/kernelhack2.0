@@ -1,8 +1,0 @@
-SubDir HAIKU_TOP src add-ons kernel drivers disk norflash ;
-
-UsePrivateHeaders drivers kernel ;
-
-KernelAddon norflash :
-	norflash.cpp
-;
-

@@ -1,6 +1,0 @@
-SubDir HAIKU_TOP src tests apps delay_shutdown ;
-
-Application DelayShutdown :
-	DelayShutdown.cpp
-	: be
-	;

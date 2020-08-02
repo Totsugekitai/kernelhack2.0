@@ -1,3 +1,0 @@
-SubDir HAIKU_TOP src tests kits opengl demos ;
-
-SubInclude HAIKU_TOP src tests kits opengl demos gears ;

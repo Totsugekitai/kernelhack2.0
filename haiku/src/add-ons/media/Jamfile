@@ -1,4 +1,0 @@
-SubDir HAIKU_TOP src add-ons media ;
-
-SubInclude HAIKU_TOP src add-ons media media-add-ons ;
-SubInclude HAIKU_TOP src add-ons media plugins ;

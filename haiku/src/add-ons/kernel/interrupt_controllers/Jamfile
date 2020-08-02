@@ -1,3 +1,0 @@
-SubDir HAIKU_TOP src add-ons kernel interrupt_controllers ;
-
-SubInclude HAIKU_TOP src add-ons kernel interrupt_controllers openpic ;

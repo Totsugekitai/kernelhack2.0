@@ -1,3 +1,0 @@
-
-Bugs
-	*	fails w/ looped audio-player nodes (needs >16 buffers!)

@@ -1,9 +1,0 @@
-/*!
-\page userlandppp The Userland PPP Kit (libppp.a)
-
-Classes:
-- PPPInterface
-- PPPInterfaceListener
-- PPPManager
-
-*/

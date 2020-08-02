@@ -1,4 +1,0 @@
-SubDir HAIKU_TOP src add-ons kernel power cpuidle ;
-
-SubInclude HAIKU_TOP src add-ons kernel power cpuidle intel_cstates ;
-

@@ -1,3 +1,0 @@
-SubDir HAIKU_TOP src tests add-ons kernel file_systems btrfs ;
-
-SubInclude HAIKU_TOP src tests add-ons kernel file_systems btrfs btrfs_shell ;

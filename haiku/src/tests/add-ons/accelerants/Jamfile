@@ -1,3 +1,0 @@
-SubDir HAIKU_TOP src tests add-ons accelerants ;
-
-SubInclude HAIKU_TOP src tests add-ons accelerants intel_extreme ;

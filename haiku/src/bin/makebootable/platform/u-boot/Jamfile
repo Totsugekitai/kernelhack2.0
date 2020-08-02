@@ -1,3 +1,0 @@
-SubDir HAIKU_TOP src bin makebootable platform u-boot ;
-
-BinCommand makebootable : makebootable.cpp ;

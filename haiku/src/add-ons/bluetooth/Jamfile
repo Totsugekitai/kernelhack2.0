@@ -1,3 +1,0 @@
-SubDir HAIKU_TOP src add-ons bluetooth ;
-
-SubInclude HAIKU_TOP src add-ons bluetooth ResetLocalDevice ;

@@ -1,3 +1,0 @@
-SubDir HAIKU_TOP src add-ons kernel console ;
-
-SubInclude HAIKU_TOP src add-ons kernel console vga_text ;

@@ -1,6 +1,0 @@
-#!/bin/sh
-
-echo "Error: The build has been configured for building the build host tools" \
-	"only." >&2
-exit 1
-

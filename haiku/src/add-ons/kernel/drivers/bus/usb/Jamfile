@@ -1,7 +1,0 @@
-SubDir HAIKU_TOP src add-ons kernel drivers bus usb ;
-
-UsePrivateKernelHeaders ;
-
-KernelAddon usb_raw :
-	usb_raw.cpp
-	;

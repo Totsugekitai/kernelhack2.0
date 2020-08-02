@@ -1,3 +1,0 @@
-SubDir HAIKU_TOP src bin debug ltrace arch m68k ;
-
-# TODO: Implement!

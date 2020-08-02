@@ -1,3 +1,0 @@
-SubDir HAIKU_TOP src tests kits opengl glut ;
-
-SubInclude HAIKU_TOP src tests kits opengl glut game_mode ;

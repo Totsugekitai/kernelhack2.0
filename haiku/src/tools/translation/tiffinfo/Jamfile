@@ -1,4 +1,0 @@
-SubDir HAIKU_TOP src tools translation tiffinfo ;
-
-BinCommand tiffinfo : tiffinfo.cpp : be ;
-

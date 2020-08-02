@@ -1,8 +1,0 @@
-SubDir HAIKU_TOP src bin network route ;
-
-UsePrivateHeaders net ;
-
-BinCommand route :
-	route.cpp
-	: be libnetwork.so libbnetapi.so
-;

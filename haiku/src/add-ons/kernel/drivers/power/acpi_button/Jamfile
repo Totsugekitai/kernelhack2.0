@@ -1,7 +1,0 @@
-SubDir HAIKU_TOP src add-ons kernel drivers power acpi_button ;
-
-UsePrivateKernelHeaders ;
-
-KernelAddon acpi_button :
-	acpi_button.cpp
-	;

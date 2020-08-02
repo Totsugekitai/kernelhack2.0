@@ -1,3 +1,0 @@
-SubDir HAIKU_TOP src add-ons locale ;
-
-SubInclude HAIKU_TOP src add-ons locale catalogs ;

@@ -1,3 +1,0 @@
-SubDir HAIKU_TOP src tests add-ons kernel network ppp shared ;
-
-SubInclude HAIKU_TOP src tests add-ons kernel network ppp shared libkernelppp ;

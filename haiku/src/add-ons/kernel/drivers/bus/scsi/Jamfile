@@ -1,8 +1,0 @@
-SubDir HAIKU_TOP src add-ons kernel drivers bus scsi ;
-
-UsePrivateHeaders kernel ;
-
-KernelAddon scsi_raw :
-	scsi_raw.c
-	;
-

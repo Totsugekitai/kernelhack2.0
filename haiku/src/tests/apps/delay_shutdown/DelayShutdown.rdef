@@ -1,3 +1,0 @@
-resource app_signature "application/x-vnd.Haiku-DelayShutdown";
-
-resource app_flags B_SINGLE_LAUNCH;

@@ -1,3 +1,0 @@
-SubDir HAIKU_TOP src add-ons kernel drivers joystick ; 
-
-SubInclude HAIKU_TOP src add-ons kernel drivers joystick emuxkigameport ;

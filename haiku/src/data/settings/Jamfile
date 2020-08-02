@@ -1,3 +1,0 @@
-SubDir HAIKU_TOP src data settings ;
-
-HaikuSubInclude tracker_new_templates ;

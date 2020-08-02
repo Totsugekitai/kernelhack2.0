@@ -1,8 +1,0 @@
-SubDir HAIKU_TOP src add-ons kernel partitioning_systems amiga ;
-
-UsePrivateHeaders kernel storage ;
-UsePrivateSystemHeaders ;
-
-KernelAddon amiga_rdb :
-	amiga_rdb.cpp
-;

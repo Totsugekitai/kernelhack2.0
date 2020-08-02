@@ -1,9 +1,0 @@
-1	hungarian	x-vnd.Haiku-KeyboardInputServerDevice	2228550365
-If the application will not quit you may have to kill it.	Team monitor		Ha a program nem lép ki magától, lehet, hogy meg kell szakítani a futását.
-Quit application	Team monitor		Program leállítása
-Restart the desktop	Team monitor		Asztal újraindítása
-Force reboot	Team monitor		Újraindítás mindenáron
-Team monitor	Team monitor		Folyamatfigyelő
-Kill application	Team monitor		Program megszakítása
-Cancel	Team monitor		Mégse
-(This team is a system component)	Team monitor		(Ez a csapat a rendszer egy komponense)

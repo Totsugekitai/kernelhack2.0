@@ -1,8 +1,0 @@
-SubDir HAIKU_TOP src add-ons input_server filters padblocker ;
-
-UsePrivateHeaders app ;
-
-Addon padblocker
-	: PadBlocker.cpp
-	: be input_server [ TargetLibstdc++ ] [ TargetLibsupc++ ]
-	;

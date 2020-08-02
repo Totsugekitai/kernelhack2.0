@@ -1,3 +1,0 @@
-SubDir HAIKU_TOP src system kernel arch ;
-
-SubInclude HAIKU_TOP src system kernel arch $(TARGET_KERNEL_ARCH) ;

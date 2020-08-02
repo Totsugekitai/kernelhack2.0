@@ -1,8 +1,0 @@
-SubDir HAIKU_TOP src add-ons kernel drivers bus pcmcia ;
-
-UseHeaders [ FDirName $(HAIKU_TOP) headers compatibility bsd ] : true ;
-
-KernelAddon ds :
-	ds.c
-	;
-

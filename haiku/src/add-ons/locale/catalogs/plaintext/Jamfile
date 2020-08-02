@@ -1,9 +1,0 @@
-SubDir HAIKU_TOP src add-ons locale catalogs plaintext ;
-
-UsePublicHeaders locale ;
-UsePrivateHeaders locale shared ;
-
-Addon <catalog-addon>plaintext
-	: Catalog.cpp 
-	: be [ TargetLibstdc++ ]
-	;

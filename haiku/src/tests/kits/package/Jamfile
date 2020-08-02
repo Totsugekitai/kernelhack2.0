@@ -1,4 +1,0 @@
-SubDir HAIKU_TOP src tests kits package ;
-
-SimpleTest make_repo : make_repo.cpp : package be ;
-

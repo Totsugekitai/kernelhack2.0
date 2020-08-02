@@ -1,3 +1,0 @@
-SubDir HAIKU_TOP src kits network ;
-
-SubInclude HAIKU_TOP src kits network libnetapi ;
