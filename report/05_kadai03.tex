@@ -1,0 +1,51 @@
+\documentclass[main]{subfiles}
+
+\begin{document}
+
+\section{実験課題3：システムコールの追加}
+
+本課題では、次のような条件を満たすシステムコールを追加する。
+
+\begin{itemize}
+ \item ユーザ空間からは引数を2つ以上とる。
+ \item 引数のうち1つは必ず番地を指定する。番地の先には可変長のデータがあるものとする。
+ \item 結果を返す。結果はレジスタか、または与えられた番地に返す。
+ \item 無効な引数とアクセス権に関してエラー処理を含む。
+\end{itemize}
+
+\subsection{Linuxのシステムコールの仕組み}
+
+Linuxのシステムコールの仕組みについて説明する。
+
+\texttt{kernel 5.7.10}のシステムコールは\texttt{arch/x86/entry/syscalls/syscall\_64.tbl}で登録されている。
+Listing\ref{syscall_64tbl}に抜粋する。
+
+\begin{lstlisting}[label=syscall_64tbl,caption=syscall\_64.tblの一部]
+#
+# 64-bit system call numbers and entry vectors
+#
+# The format is:
+# <number> <abi> <name> <entry point>
+#
+# The __x64_sys_*() stubs are created on-the-fly for sys_*() system calls
+#
+# The abi is "common", "64" or "x32" for this file.
+#
+0	common	read			sys_read
+1	common	write			sys_write
+2	common	open			sys_open
+3	common	close			sys_close
+4	common	stat			sys_newstat
+.
+.
+.
+545	x32	execveat		compat_sys_execveat
+546	x32	preadv2			compat_sys_preadv64v2
+547	x32	pwritev2		compat_sys_pwritev64v2
+\end{lstlisting}
+
+Listing\ref{syscall_64tbl}では、一行ごとに、システムコール番号、ABI、名前、エントリポイントが記載されている。
+ABIは\texttt{common, 64, x32}のどれかを指定する。
+また、名前にはコンパイル時に\texttt{\_\_x64\_sys\_}の接頭辞が付けられる。
+
+\end{document}
