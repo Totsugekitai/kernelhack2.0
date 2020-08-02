@@ -1,0 +1,32 @@
+SubDir HAIKU_TOP src add-ons translators raw ;
+
+SubDirHdrs [ FDirName $(SUBDIR) $(DOTDOT) shared ] ;
+
+AddResources RAWTranslator : RAWTranslator.rdef ;
+
+local architectureObject ;
+for architectureObject in [ MultiArchSubDirSetup ] {
+	on $(architectureObject) {
+		Translator [ MultiArchDefaultGristFiles RAWTranslator ] :
+			# RawTranslator classes
+			main.cpp
+			RAWTranslator.cpp
+			ConfigView.cpp
+			RAW.cpp
+			: 
+			be translation 
+			[ MultiArchDefaultGristFiles libtranslatorsutils.a ]
+			[ TargetLibsupc++ ] localestub
+			: 
+			true
+		;
+	}
+}
+
+DoCatalogs RAWTranslator :
+	x-vnd.Haiku-RAWTranslator
+	:
+	RAWTranslator.cpp
+	ConfigView.cpp
+	main.cpp
+;

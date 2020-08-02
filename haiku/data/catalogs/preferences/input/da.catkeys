@@ -1,0 +1,53 @@
+1	danish	x-vnd.Haiku-Input	1950274171
+Defaults	InputMouse		Standarder
+Scrolling	TouchpadPrefView		Rulning
+Long	KeyboardView		Lang
+Normal	SettingsView		Normal
+Cancel	TouchpadPrefView		Annuller
+Slow	TouchpadPrefView		Langsom
+Warp	SettingsView		Warp
+Device List	InputWindow		Enhedsliste
+Double-click speed	SettingsView		Hastighed for dobbeltklik
+5-Button	SettingsView		5-knap
+Typing test area	KeyboardView		Testområde til skrivning
+Fast	KeyboardView		Hurtig
+Please confirm	TouchpadPrefView		Bekræft venligst
+Mouse speed	SettingsView		Musehastighed
+Horizontal scrolling	TouchpadPrefView		Vandret rulning
+Input	System name		Input
+Quick	TouchpadPrefView		Hurtigt
+Short	KeyboardView		Kort
+Revert	InputMouse		Omvendt
+Slow	KeyboardView		Langsom
+2-Button	SettingsView		2-knap
+Click to focus and raise	SettingsView		Klik for at fokusere og løft
+Vertical	TouchpadPrefView		Lodret
+Double-click test area	SettingsView		Testområde for dobbeltklik
+Focus follows mouse	SettingsView		Fokus følger mus
+Focus mode:	SettingsView		Fokustilstand:
+Revert	TouchpadPrefView		Omvendt
+4-Button	SettingsView		4-knap
+Tapping sensitivity	TouchpadPrefView		Trykfølsomhed
+Instant warp	SettingsView		Warp med det samme
+Revert	InputKeyboard		Omvendt
+Mouse type:	SettingsView		Musetype:
+Off	TouchpadPrefView		Fra
+Never	TouchpadPrefView		Aldrig
+Fast	TouchpadPrefView		Hurtig
+6-Button	SettingsView		6-knap
+Click to focus	SettingsView		Klik for at fokusere
+Acceleration	TouchpadPrefView		Acceleration
+Accept first click	SettingsView		Acceptér første klik
+OK	TouchpadPrefView		OK
+Keyboard Lock Delay	TouchpadPrefView		Forsinkelse ved tastaturlås
+Delay until key repeat	KeyboardView		Forsinkelse før gentagelse af tast
+Two finger scrolling	TouchpadPrefView		Rulning med 2 fingre
+The new scroll area is very large and may impede normal mouse operation. Do you really want to change it?	TouchpadPrefView		Det nye rulleområde er meget stort og kan vanskeliggøre normal musehandling. Vil du virkelig ændre det?
+Mouse acceleration	SettingsView		Museacceleration
+Defaults	TouchpadPrefView		Standarder
+High	TouchpadPrefView		Høj
+1-Button	SettingsView		1-knap
+Defaults	InputKeyboard		Standarder
+Key repeat rate	KeyboardView		Hastighed for gentagelse af tast
+Horizontal	TouchpadPrefView		Vandret
+3-Button	SettingsView		3-knap

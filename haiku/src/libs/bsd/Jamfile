@@ -1,0 +1,28 @@
+SubDir HAIKU_TOP src libs bsd ;
+
+UseHeaders [ FDirName $(HAIKU_TOP) headers compatibility bsd ] : true ;
+
+local architectureObject ;
+for architectureObject in [ MultiArchSubDirSetup ] {
+	on $(architectureObject) {
+		SharedLibrary [ MultiArchDefaultGristFiles libbsd.so ] :
+			daemon.c
+			err.c
+			explicit_bzero.c
+			fgetln.c
+			getpass.c
+			issetugid.c
+			lutimes.c
+			progname.c
+			pty.cpp
+			readpassphrase.c
+			signal.c
+			string.cpp
+			stringlist.c
+			unvis.c
+			usershell.c
+			vis.c
+			wait.c
+			;
+	}
+}

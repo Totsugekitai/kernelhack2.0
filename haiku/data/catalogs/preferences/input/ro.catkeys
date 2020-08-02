@@ -1,0 +1,53 @@
+1	romanian	x-vnd.Haiku-Input	1950274171
+Defaults	InputMouse		Implicite
+Scrolling	TouchpadPrefView		Se derulează
+Long	KeyboardView		Lung
+Normal	SettingsView		Normal
+Cancel	TouchpadPrefView		Anulează
+Slow	TouchpadPrefView		Încet
+Warp	SettingsView		Deviere
+Device List	InputWindow		Listă de dispozitive
+Double-click speed	SettingsView		Viteză de clic dublu
+5-Button	SettingsView		5-Buton
+Typing test area	KeyboardView		Zonă de testare de tastare
+Fast	KeyboardView		Rapid
+Please confirm	TouchpadPrefView		Confirmați
+Mouse speed	SettingsView		Viteză maus
+Horizontal scrolling	TouchpadPrefView		Derulare orizontală
+Input	System name		Intrare
+Quick	TouchpadPrefView		Repede
+Short	KeyboardView		Scund
+Revert	InputMouse		Revenire
+Slow	KeyboardView		Încet
+2-Button	SettingsView		2-Buton
+Click to focus and raise	SettingsView		Dați clic pentru a focaliza și a înălța
+Vertical	TouchpadPrefView		Vertical
+Double-click test area	SettingsView		Zonă de testare a clicului dublu
+Focus follows mouse	SettingsView		Focalizarea urmărește mausul
+Focus mode:	SettingsView		Mod de focalizare:
+Revert	TouchpadPrefView		Revenire
+4-Button	SettingsView		4-Buton
+Tapping sensitivity	TouchpadPrefView		Senzitivitate la atingere
+Instant warp	SettingsView		Deviere instantă
+Revert	InputKeyboard		Revenire
+Mouse type:	SettingsView		Tip de maus:
+Off	TouchpadPrefView		Oprit
+Never	TouchpadPrefView		Niciodată
+Fast	TouchpadPrefView		Rapid
+6-Button	SettingsView		Butonul-6
+Click to focus	SettingsView		Dați clic pentru a focaliza
+Acceleration	TouchpadPrefView		Accelerare
+Accept first click	SettingsView		Acceptă primul clic
+OK	TouchpadPrefView		OK
+Keyboard Lock Delay	TouchpadPrefView		Amânare de blocare de tastatură
+Delay until key repeat	KeyboardView		Amânare până la repetarea tastei
+Two finger scrolling	TouchpadPrefView		Derulare cu două degete
+The new scroll area is very large and may impede normal mouse operation. Do you really want to change it?	TouchpadPrefView		Noua zonă de derulare este foarte mare și poate să împiedice operația normală a mausului. Sigur doriți să o modificați?
+Mouse acceleration	SettingsView		Accelerare maus
+Defaults	TouchpadPrefView		Implicite
+High	TouchpadPrefView		Înalt
+1-Button	SettingsView		1-Buton
+Defaults	InputKeyboard		Implicite
+Key repeat rate	KeyboardView		Rata de repetiție a tastei
+Horizontal	TouchpadPrefView		Orizontal
+3-Button	SettingsView		3-Buton

@@ -1,0 +1,18 @@
+SubDir HAIKU_TOP src servers midi ;
+
+UsePrivateHeaders app midi shared storage ;
+
+Server midi_server :
+	MidiServerApp.cpp
+	DeviceWatcher.cpp
+	PortDrivers.cpp
+
+	# storage
+	NodeMonitorHandler.cpp
+
+	: be midi2 shared libicon.a [ TargetLibstdc++ ]
+	: midi_server.rdef
+;
+
+SEARCH on [ FGristFiles NodeMonitorHandler.cpp ]
+	+= [ FDirName $(SUBDIR) $(DOTDOT) $(DOTDOT) kits storage ] ;

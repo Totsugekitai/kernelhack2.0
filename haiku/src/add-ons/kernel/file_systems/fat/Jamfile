@@ -1,0 +1,24 @@
+SubDir HAIKU_TOP src add-ons kernel file_systems fat ;
+
+UsePrivateKernelHeaders ;
+
+SubDirCcFlags -DTRACK_FILENAME ;
+
+KernelAddon fat :
+	attr.c
+	dir.c
+	dlist.c
+	dosfs.c
+	encodings.cpp
+	fat.c
+	file.c
+	iter.c
+	mime_ext_table.c
+	mkdos.cpp
+	util.c
+	vcache.c
+	version.c
+;
+
+SEARCH on [ FGristFiles mime_ext_table.c ]
+	+= [ FDirName $(HAIKU_TOP) src add-ons kernel file_systems shared ] ;

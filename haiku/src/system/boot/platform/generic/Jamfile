@@ -1,0 +1,20 @@
+SubDir HAIKU_TOP src system boot platform generic ;
+
+UseBuildFeatureHeaders zlib ;
+UsePrivateKernelHeaders ;
+
+SubDirC++Flags -D_BOOT_MODE -fno-rtti ;
+
+local platform ;
+for platform in [ MultiBootSubDirSetup ] {
+	on $(platform) {
+		BootStaticLibrary boot_platform_generic_$(platform:G=) :
+			text_menu.cpp
+			video_blit.cpp
+			video_splash.cpp
+		;
+
+		Includes [ FGristFiles video_splash.cpp ]
+			: [ BuildFeatureAttribute zlib : headers ] ;
+	}
+}

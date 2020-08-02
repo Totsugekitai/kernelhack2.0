@@ -1,0 +1,34 @@
+SubDir HAIKU_TOP src add-ons kernel drivers network wlan ralinkwifi ;
+
+UseHeaders [ FDirName $(HAIKU_TOP) src libs compat freebsd_network compat ]
+	: true ;
+UseHeaders [ FDirName $(HAIKU_TOP) src libs compat freebsd_wlan ] : true ;
+UsePrivateHeaders net system ;
+UsePrivateKernelHeaders ;
+
+SubDirCcFlags [ FDefines _KERNEL=1 FBSD_DRIVER=1 ]
+	-Wno-format
+	-Wno-unused
+	-Wno-uninitialized ;
+
+UseHeaders [ FDirName $(SUBDIR) ] : true ;
+
+SEARCH_SOURCE += [ FDirName $(SUBDIR) dev ral ] ;
+
+KernelAddon ralinkwifi :
+	if_ral_pci.c
+	rt2560.c
+	rt2661.c
+	rt2860.c
+	glue.c
+	:
+	freebsd_wlan.a
+	libfreebsd_network.a
+	;
+
+HAIKU_WIFI_FIRMWARE_PACKAGES on ralinkwifi = RT61_Firmware_V1.2
+	RT2860_Firmware_V26 ;
+HAIKU_WIFI_FIRMWARE_ARCHIVES on ralinkwifi = RT61_Firmware_V1.2.zip
+	RT2860_Firmware_V26.zip ;
+HAIKU_WIFI_FIRMWARE_DO_EXTRACT on ralinkwifi = true ;
+

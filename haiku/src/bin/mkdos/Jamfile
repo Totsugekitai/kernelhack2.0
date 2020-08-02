@@ -1,0 +1,6 @@
+SubDir HAIKU_TOP src bin mkdos ;
+
+BinCommand mkdos :
+	mkdos.cpp
+;
+

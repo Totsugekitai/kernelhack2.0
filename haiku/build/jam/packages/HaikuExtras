@@ -1,0 +1,13 @@
+local architecture = $(HAIKU_PACKAGING_ARCHS[1]) ;
+
+local extrasPackage = haiku_extras.hpkg ;
+HaikuPackage $(extrasPackage) ;
+
+# kernel modules
+AddFilesToPackage add-ons kernel partitioning_systems
+	: amiga_rdb@!m68k apple@!ppc sun@!sparc ;
+
+AddFilesToPackage add-ons control_look	: BeControlLook ;
+
+BuildHaikuPackage $(extrasPackage) : haiku_extras ;
+

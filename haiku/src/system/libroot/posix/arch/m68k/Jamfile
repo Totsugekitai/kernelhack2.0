@@ -1,0 +1,20 @@
+SubDir HAIKU_TOP src system libroot posix arch m68k ;
+
+local architecture = $(TARGET_ARCH) ;
+
+UsePrivateSystemHeaders ;
+
+local genericSources =
+	setjmp_save_sigs.c
+	longjmp_return.c
+;
+
+MergeObject <$(TARGET_ARCH)>posix_arch_$(TARGET_ARCH).o :
+	sigsetjmp.S
+	siglongjmp.S
+
+	$(genericSources)
+;
+
+SEARCH on [ FGristFiles $(genericSources) ]
+	= [ FDirName $(SUBDIR) $(DOTDOT) generic ] ;

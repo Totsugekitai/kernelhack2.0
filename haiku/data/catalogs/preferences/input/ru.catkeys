@@ -1,0 +1,48 @@
+1	russian	x-vnd.Haiku-Input	1910113385
+Defaults	InputMouse		По умолчанию
+Scrolling	TouchpadPrefView		Прокрутка
+Long	KeyboardView		Длинная
+Normal	SettingsView		Обычно
+Cancel	TouchpadPrefView		Отмена
+Slow	TouchpadPrefView		Медленно
+Warp	SettingsView		Перемещение
+Device List	InputWindow		Список устройств
+Double-click speed	SettingsView		Скорость двойного клика
+5-Button	SettingsView		Пятикнопочная
+Typing test area	KeyboardView		Тестовая область
+Fast	KeyboardView		Быстро
+Please confirm	TouchpadPrefView		Пожалуйста, подтвердите
+Mouse speed	SettingsView		Скорость курсора
+Horizontal scrolling	TouchpadPrefView		Горизонтальная прокрутка
+Input	System name		Ввод
+Short	KeyboardView		Короткая
+Revert	InputMouse		Вернуть
+Slow	KeyboardView		Медленно
+2-Button	SettingsView		Двухкнопочная
+Click to focus and raise	SettingsView		Кликнуть для фокуса и поднятия окна
+Vertical	TouchpadPrefView		Вертикальная
+Double-click test area	SettingsView		Область для проверки двойного клика
+Focus follows mouse	SettingsView		Фокус следует за курсором
+Focus mode:	SettingsView		Режим фокуса:
+Revert	TouchpadPrefView		Вернуть
+4-Button	SettingsView		Четырехкнопочная
+Instant warp	SettingsView		Мгновенное перемещение
+Revert	InputKeyboard		Вернуть
+Mouse type:	SettingsView		Тип мыши:
+Off	TouchpadPrefView		Выключить
+Fast	TouchpadPrefView		Быстро
+Click to focus	SettingsView		Кликнуть для фокусировки окна
+Acceleration	TouchpadPrefView		Ускорение
+Accept first click	SettingsView		Принимать первый клик
+OK	TouchpadPrefView		ОК
+Delay until key repeat	KeyboardView		Задержка перед повтором клавиши
+Two finger scrolling	TouchpadPrefView		Прокрутка двумя пальцами
+The new scroll area is very large and may impede normal mouse operation. Do you really want to change it?	TouchpadPrefView		Выбранная область прокрутки слишком большая и может затруднить обычные операции с мышью. Вы действительно хотите изменить ее?
+Mouse acceleration	SettingsView		Ускорение мыши
+Defaults	TouchpadPrefView		По умолчанию
+High	TouchpadPrefView		Высокая
+1-Button	SettingsView		Однокнопочная
+Defaults	InputKeyboard		По умолчанию
+Key repeat rate	KeyboardView		Скорость повтора клавиши
+Horizontal	TouchpadPrefView		Горизонтальная
+3-Button	SettingsView		Трехкнопочная

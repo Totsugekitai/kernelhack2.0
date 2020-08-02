@@ -1,0 +1,18 @@
+SubDir HAIKU_TOP src tests add-ons kernel debugger ;
+
+SubDirHdrs $(HAIKU_TOP) src kits debugger demangler ;
+
+UnitTestLib libkerneldebuggertest.so :
+	KernelDebuggerTest.cpp
+
+	DemangleTest.cpp
+
+	: <nogrist>Debugger_demangler.o
+	be [ TargetLibstdc++ ] [ TargetLibsupc++ ]
+	;
+
+SimpleTest haikuc++filt :
+	c++filt.cpp
+	: <nogrist>Debugger_demangler.o
+	be [ TargetLibstdc++ ] [ TargetLibsupc++ ]
+	;
