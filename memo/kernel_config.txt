@@ -1,0 +1,22 @@
+/* Kernel Hacking config */
+DEBUG_INFO = y
+
+/* Plan 9 File System */
+9P_FS = y
+9P_FS_POSIX_ACL = y
+NET_9P = y
+
+/* PCI Config */
+PCI_HOST_COMMON = y
+PCI_HOST_GENERIC = y
+
+/* Open Firmware Config */
+OF = y
+
+/* virtio support */
+VIRTIO = y
+VIRTIO_NET = y
+VIRTIO_PCI = y
+
+/* Fuse FS config */
+FUSE_FS = y
