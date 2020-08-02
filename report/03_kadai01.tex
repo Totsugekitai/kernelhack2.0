@@ -1,0 +1,40 @@
+\documentclass[main]{subfiles}
+
+\begin{document}
+
+\section{実験課題1：カーネルのコンパイルとパラメタの設定}
+
+本課題では、オペレーティングシステムのカーネルのパラメタを適切に設定し、コンパイルを行う。
+
+\subsection{使用したOSとカーネルのバージョン}
+
+使用したOSは\textbf{Linux}、カーネルのバージョンは\textbf{5.7.10}である。
+
+\subsection{カーネルパラメタ}
+
+Listing\ref{kernelconf}は、\texttt{make defconfig}で生成したデフォルトのパラメタから変更したものの一部である。
+すべて列挙すると膨大であり、依存関係を把握しきれないため、主要なもののみ抜粋する。
+
+\lstinputlisting[label=kernelconf,caption=変更した主要カーネルパラメタ]{../memo/kernel_config.txt}
+
+各パラメタの説明をする。
+
+\texttt{DEBUG\_INFO}はカーネルデバッグをする上での情報をカーネルに付随させるパラメタである。
+
+\texttt{9P\_FS}と\texttt{PCI}、\texttt{VIRTIO}のパラメタは、ホストとゲスト間で9Pプロトコルを用いてファイル共有を行うために必要なパラメタである。
+
+\texttt{FUSE\_FS}は、\textit{Filesystem in Userpace}機能を用いるために必要なパラメタである。
+
+\subsection{カーネルのコンパイル}
+
+Listing\ref{kernel_make}は、カーネルとカーネルモジュールのコンパイルコマンドである。
+
+\begin{lstlisting}[language=sh,label=kernel_make,caption=カーネルのコンパイル]
+$ make -j8
+$ make modules -j8
+\end{lstlisting}
+
+\texttt{make}コマンドは\texttt{-j}オプションで並列実行が可能である。
+使用した計算機のCPUが8スレッドのため、8並列でコンパイルした。
+
+\end{document}

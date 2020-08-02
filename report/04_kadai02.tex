@@ -1,0 +1,65 @@
+\documentclass[main]{subfiles}
+
+\begin{document}
+
+\section{実験課題2：カーネルのリモートデバッグ}
+
+本課題では、以降の実験を円滑に進めるために、カーネルをリモートデバッグできるようにする。
+
+\subsection{GDBの使用方法}
+
+GDBは、Listing\ref{gdb_comm}のように用いる。
+
+\begin{lstlisting}[label=gdb_comm,caption=GDBの使用の様子,language=sh]
+$ cd /path/to/linux
+$ gdb ./vmlinux
+
+(gdb) target remote localhost:1234
+(gdb) b __x64_sys_getppid
+(gdb) c
+
+Breakpoint 2, get_current () at ./arch/x86/include/asm/current.h:15
+15              return this_cpu_read_stable(current_task);
+\end{lstlisting}
+
+カーネルを\texttt{make}した際の生成物である\texttt{vmlinux}を引数に指定してGDBを起動する。
+
+GDBを起動したら、\texttt{localhost}のポート\texttt{1234}番に対して接続を行う。
+ここでVMの実行が停止する。
+
+\texttt{break}コマンド(短縮コマンドは\texttt{b})でシステムコールの実体にbreakpointを仕掛ける。
+ここでは\texttt{\_\_x64\_sys\_getppid}に対してbreakpointを仕掛けた。
+
+\texttt{continue}コマンド(短縮コマンドは\texttt{c})でVMの実行を継続させる。
+その後breakpointまで到達すると、VMの実行が停止する。
+ここからGDBを用いてデバッグをする。
+
+\subsection{GDBを用いたデバッグ}
+
+Listing\ref{use_getppid}のC言語で書かれたプログラムを用いて、リモートデバッグが可能かどうか検証する。
+
+\lstinputlisting[label=use_getppid,caption=GDBデバッグ検証に用いるプログラム,language=c]{../userland/use_getppid.c}
+
+このプログラムは、ライブラリ関数\texttt{getppid}を呼び出して標準出力に出力するプログラムである。
+このプログラムをゲスト環境で実行し、GDBを用いたデバッグが可能かどうか検証する。
+
+Listing\ref{gdb_getppid}は、Listing\ref{use_getppid}のプログラムをゲスト上でコンパイルし、実行した際のGDBの様子である。
+
+\begin{lstlisting}[label=gdb_getppid,caption=GDBの動作の様子,language=sh]
+(gdb) target remote :1234
+Remote debugging using :1234
+default_idle () at arch/x86/kernel/process.c:676
+676             trace_cpu_idle_rcuidle(PWR_EVENT_EXIT, smp_processor_id());
+(gdb) b __x64_sys_getppid
+Breakpoint 1 at 0xffffffff8107c020: file ./arch/x86/include/asm/current.h, line 15.
+(gdb) c
+Continuing.
+
+Breakpoint 1, get_current () at ./arch/x86/include/asm/current.h:15
+15              return this_cpu_read_stable(current_task);
+(gdb)
+\end{lstlisting}
+
+うまくシステムコールをbreakできていることが確認できた。
+
+\end{document}

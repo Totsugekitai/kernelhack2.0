@@ -1,0 +1,94 @@
+\documentclass[main]{subfiles}
+
+\begin{document}
+
+\section{実験の環境}
+
+\subsection{ホスト環境}
+
+\begin{table}[]
+\begin{tabular}{|r|l|}
+\hline
+計算機機種  & Lenovo ThinkPad L380                     \\ \hline
+CPU    & Intel(R) Core(TM) i3-7020U CPU @ 2.30GHz \\ \hline
+メモリ    & 32GB                                     \\ \hline
+OS     & Arch Linux x86\_64                       \\ \hline
+Kernel & 5.7.10-arch1-1                           \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{ゲスト環境}
+
+\begin{table}[]
+\begin{tabular}{|r|l|}
+\hline
+VM環境   & QEMU               \\ \hline
+割当メモリ  & 2GB                \\ \hline
+OS     & Arch Linux x86\_64 \\ \hline
+Kernel & 5.7.10             \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{VMのセットアップ}
+
+\subsubsection{VMの起動方法}
+\label{how_to_vm_boot}
+
+\texttt{QEMU}にListing\ref{qemu_option}のオプションをつけて起動する。
+
+\begin{lstlisting}[label=qemu_option,caption=QEMUのオプション,language=make]
+$ qemu-system-x86_64 -enable-kvm -s -kernel $(TOOLS)/bzImage -boot c -m 2049M -hda $(TOOLS)/image.img -append "root=/dev/sda rw console=ttyS0,115200 acpi=off nokaslr" -serial stdio -display none -virtfs local,path=$(SHARE),security_model=none,mount_tag=share --no-reboot
+\end{lstlisting}
+
+主要なオプションを解説する。
+
+\texttt{-kernel}でカーネルイメージを指定する。
+
+\texttt{-hda}で取り付けたいブロックデバイスを指定する。
+
+\texttt{-append}でカーネルのブートオプションを指定する。
+\texttt{root=/dev/sda}でrootfsを指定する。
+\texttt{nokaslr}で\textit{Kernel Address Space Layout Randomization}を無効化する。
+
+\texttt{-serial stdio}でゲストのシリアル入出力をホスト側の標準入出力に繋げ、\texttt{-display none}でGUIを表示しないようにする。
+
+\texttt{-virtfs}で9Pプロトコルを用いたファイル共有の設定をする。
+\texttt{path=(共有ディレクトリ)}で共有ディレクトリを指定する。
+
+\subsubsection{rootfsの作成}
+
+\ref{how_to_vm_boot}項で、QEMUのオプションの\texttt{-hda}で取り付けたブロックデバイスは、Linuxのrootfsと呼ばれる起動時にマウントされるファイルシステムである。
+rootfsの作成はListing\ref{make_rootfs}の手順で行った。
+
+\begin{lstlisting}[language=sh,label=make_rootfs,caption=rootfsの作成]
+$ qemu-img create image.img 8g
+$ mkfs.ext4 image.img
+$ mkdir mountpoint
+$ sudo mount -o loop image.img mountpoint
+$ sudo pacstrap mountpoint base linux linux-firmware
+$ sudo umount mountpoint
+\end{lstlisting}
+
+まず\texttt{qemu-img create}コマンドでディスクイメージファイルを作成する。
+ここでは8GBのディスクイメージを作成した。
+
+次にディスクイメージを\texttt{ext4}ファイルシステムでフォーマットする。
+
+さらに、\texttt{mountpoint}ディレクトリにディスクイメージをマウントし、\texttt{pacstrap}コマンドでrootfsに必要なパッケージをインストールし、rootfsを作成する。
+
+最後にディスクイメージをアンマウントする。
+
+\subsubsection{ホストとゲスト間でのファイル共有}
+
+実験を円滑に進めるために、9Pプロトコルを用いてファイル共有を行う。
+
+ゲスト側からホスト側のファイルにアクセスするためには、ゲスト側でListing\ref{file_sharing}のコマンドを実行すれば良い。
+
+\begin{lstlisting}[language=sh,label=file_sharing,caption=アクセス手順]
+$ mkdir host
+$ sudo mount -t 9p -o trans=virtio share ./host -oversion=9p2000.L
+\end{lstlisting}
+
+これにより、ゲスト側からホスト側のファイルにアクセスすることができる。
+
+\end{document}
