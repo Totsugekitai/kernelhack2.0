@@ -4,6 +4,15 @@
 #include <stdio.h>
 
 #define SYS_HELLO (548)
+#define SYS_HOOK (549)
+
+asmlinkage int orig_write(int, const char *, int);
+
+asmlinkage int hook(int fd, const char *buf, int len)
+{
+    printf("hook!!!!!!!\n");
+    return 1;
+}
 
 int main(void)
 {
@@ -23,4 +32,6 @@ int main(void)
     printf("error no: %ld\n", err);
     err = syscall(SYS_HELLO, s, buf, 0x10000000);
     printf("error no: %ld\n", err);
+
+    printf("syscall hook\n");
 }
