@@ -13,9 +13,12 @@
  \item 無効な引数とアクセス権に関してエラー処理を含む。
 \end{itemize}
 
-\subsection{Linuxのシステムコールの仕組み}
+\subsection{Linuxのシステムコール実装の仕組み}
+\label{syscall_sikumi}
 
-Linuxのシステムコールの仕組みについて説明する。
+Linuxのシステムコール実装の仕組みについて説明する。
+
+\subsubsection{システムコールの登録}
 
 \texttt{kernel 5.7.10}のシステムコールは\texttt{arch/x86/entry/syscalls/syscall\_64.tbl}で登録されている。
 Listing\ref{syscall_64tbl}に抜粋する。
@@ -44,8 +47,94 @@ Listing\ref{syscall_64tbl}に抜粋する。
 547	x32	pwritev2		compat_sys_pwritev64v2
 \end{lstlisting}
 
-Listing\ref{syscall_64tbl}では、一行ごとに、システムコール番号、ABI、名前、エントリポイントが記載されている。
+Listing\ref{syscall_64tbl}のコメントに書いてあるとおり、一行ごとに、システムコール番号、ABI、名前、エントリポイントが記載されている。
 ABIは\texttt{common, 64, x32}のどれかを指定する。
-また、名前にはコンパイル時に\texttt{\_\_x64\_sys\_}の接頭辞が付けられる。
+また、\texttt{sys\_*()}という名前のシステムコールにはコンパイル時に\texttt{\_\_x64\_sys\_*()}の接頭辞が付けられる。
+
+\subsubsection{システムコール本体の実装と登録}
+
+システムコール本体はカーネルに組み込まれるため、\texttt{Makefile}に新たなファイルを登録する際には、Listing\ref{obj-y}のように\texttt{obj-y}の部分にファイルを追記する必要がある。
+
+\begin{lstlisting}[label=obj-y,caption=システムコールの実装を記述したファイルのMakefileへの追記]
+obj-y += new_syscall.o
+\end{lstlisting}
+
+また、システムコール本体の登録には、\texttt{SYSCALL\_DEFINEx}マクロが用いられる。
+
+\begin{lstlisting}[label=syscall_define,caption=システムコール登録に用いるマクロ,language=c]
+long do_new_syscall(int arg1, void *arg2)
+{
+    // some code...
+    return 0;
+}
+
+SYSCALL_DEFINE2(new_syscall, int, arg1, void *, arg2)
+{
+    return do_new_syscall(arg1, arg2);
+}
+\end{lstlisting}
+
+Listing\ref{syscall_define}では、システムコール本体の実装として\texttt{do\_new\_syscall}を、システムコール本体の登録に\texttt{SYSCALL\_DEFINE2}を用いている。
+\texttt{SYSCALL\_DEFINEx}マクロは、\texttt{x}の部分にシステムコール本体の引数の数が入る。
+マクロの第1引数にシステムコールの名前が入り、続く引数には、引数の型と引数の名前を交互に入れていく。
+
+\subsection{システムコールの実装とその使用}
+
+\ref{syscall_sikumi}節を踏まえて、オリジナルのシステムコールを実装する。
+今回実装したのは、受け取った文字列に対して末尾に文字列を追加して返却するシステムコールである。
+
+\subsubsection{システムコールの実装}
+
+Listing\ref{my_syscall}にコードを示す。
+
+\lstinputlisting[label=my_syscall,caption=\texttt{syscall\_hello.c},language=c]{../linux-5.7.10/totsugeki/my_syscall.c}
+
+解説をする。
+
+受け取る引数は、ユーザー空間から読み込む文字列と、加工した文字列を書き出すユーザー空間の領域と、読み込む文字列の長さである。
+
+まず16-18行目と19-21行目でユーザー空間へのアクセスが正しいものか\texttt{access\_ok}で確かめる。
+その後26行目で\texttt{copy\_from\_user}を用いてユーザー空間からデータ（今回は文字列）をコピーする。
+29行目で受け取った文字列の末尾に\texttt{syscall hello!}を追加し、31行目でカーネル空間からユーザー空間にデータをコピーする。
+
+戻り値はユーザー空間に返却する文字列の長さである。
+
+システムコールの登録は\texttt{SYSCALL\_DEFINE3}を用い、システムコールの名前は\texttt{hello}にした。
+
+また、\texttt{syscall\_64.tbl}にListing\ref{table_tsuiki}のように追記する。
+
+\begin{lstlisting}[label=table_tsuiki,caption=\texttt{syscall\_64.tbl}に追加する]
+.
+.
+.
+545	x32	execveat		compat_sys_execveat
+546	x32	preadv2			compat_sys_preadv64v2
+547	x32	pwritev2		compat_sys_pwritev64v2
+548 64  hello           sys_hello
+\end{lstlisting}
+
+\subsubsection{システムコールの使用}
+
+Listing\ref{hello_syscall_user}のプログラムをゲスト上でコンパイルし、実行する。
+
+\lstinputlisting[label=hello_syscall_user,caption=ユーザーランドから利用する,language=c]{../userland/syscall.c}
+
+14-16行目では正常な値を引数として入力した場合の、戻ってきた文字列と戻り値の表示をしている。
+18行目は与える文字列を\texttt{NULL}にした際のシステムコールで、20行目はカーネル空間から戻ってくる文字列を格納する領域を\texttt{NULL}にした際のシステムコール、22行目はどちらも\texttt{NULL}にした際のシステムコール、24行目は第3引数に大きすぎる値を指定した際のシステムコールである。
+
+Listing\ref{syscall_kekka}に結果を示す。
+
+\begin{lstlisting}[label=syscall_kekka,caption=システムコールの実行結果,language=sh]
+[root@archlinux host]# gcc syscall.c
+[root@archlinux host]# ./a.out
+syscall jikken syscall hello!!
+error no: 33
+error no: -1
+error no: -1
+error no: -1
+error no: -1
+\end{lstlisting}
+
+各実行で予想された値が返ってきたことが確認された。
 
 \end{document}
