@@ -175,6 +175,124 @@ obj-$(CONFIG_KITCHEN_TIMER) += my_module.o
 
 \subsubsection{ゲストでのデバイスドライバの実行}
 
+ゲスト上で\texttt{/proc/devices}を表示すると、Listing\ref{device_list}を得られる。
 
+\begin{lstlisting}[label=device_list,caption=\texttt{/proc/devices}を表示する,language=sh]
+[root@archlinux ~]# cat /proc/devices
+Character devices:
+  1 mem
+  4 /dev/vc/0
+  4 tty
+.
+.
+.
+250 kitchen_timer
+\end{lstlisting}
+
+\texttt{250}番に登録されているので、Listing\ref{device_register}のように\texttt{mknod}コマンドでキャラクタデバイスを特殊ファイルとして作成する。
+
+\begin{lstlisting}[label=device_register,caption=\texttt{/dev}以下にファイルを作成,language=sh]
+[root@archlinux ~]# mknod /dev/kitchen c 250 1
+[root@archlinux ~]# ls /dev/
+autofs           loop-control  rtc       tty14  tty32  tty50  ttyS2
+block            loop0         rtc0      tty15  tty33  tty51  ttyS3
+bsg              loop1         scif      tty16  tty34  tty52  urandom
+cdrom            loop2         sda       tty17  tty35  tty53  usbmon0
+char             loop3         sg0       tty18  tty36  tty54  vcs
+console          loop4         sg1       tty19  tty37  tty55  vcs1
+core             loop5         shm       tty2   tty38  tty56  vcs9
+cpu              loop6         snapshot  tty20  tty39  tty57  vcsa
+cpu_dma_latency  loop7         snd       tty21  tty4   tty58  vcsa1
+disk             mapper        sr0       tty22  tty40  tty59  vcsa9
+fd               md0           stderr    tty23  tty41  tty6   vcsu
+full             mem           stdin     tty24  tty42  tty60  vcsu1
+fuse             mqueue        stdout    tty25  tty43  tty61  vcsu9
+hugepages        null          tty       tty26  tty44  tty62  vga_arbiter
+hwrng            nvram         tty0      tty27  tty45  tty63  zero
+initctl          port          tty1      tty28  tty46  tty7
+input            ptmx          tty10     tty29  tty47  tty8
+kitchen          pts           tty11     tty3   tty48  tty9
+kmsg             random        tty12     tty30  tty49  ttyS0
+log              rfkill        tty13     tty31  tty5   tty1S
+\end{lstlisting}
+
+実際に動作させてみる。
+10秒のタイマーを作成して、タイマー動作中にデバイスに対して表示を試みたのがListing\ref{devdrv_exec1}である。
+
+\begin{lstlisting}[label=devdrv_exec1,caption=シェル上での動作,language=sh]
+[root@archlinux dev]# echo 10 > kitchen
+[root@archlinux dev]# cat kitchen
+3 second passed
+[root@archlinux dev]# cat kitchen
+6 second passed
+\end{lstlisting}
+
+\texttt{dmesg}コマンドでカーネルメッセージを表示してみると、Listing\ref{devdrv_exec2}のようになる。
+
+\begin{lstlisting}[label=devdrv_exec2,caption=\texttt{dmesg}でカーネルメッセージを読む,language=sh]
+[  127.504767] kitchen_timer open start.
+[  127.504767] kitchen_timer open end.
+[  127.505767] kitchen_timer write start.
+[  127.505767] mybuf: 10
+
+[  127.505767] expires: 4294804821
+[  127.505767] kitchen_timer write end.
+[  127.505767] kitchen_timer close.
+[  131.146213] kitchen_timer open start.
+[  131.146213] kitchen_timer open end.
+[  131.146213] kitchen_timer read start.
+[  131.146213] kitchen_timer read end.
+[  131.148213] kitchen_timer read start.
+[  131.148213] kitchen_timer read end.
+[  131.148213] kitchen_timer close.
+[  134.346727] kitchen_timer open start.
+[  134.346727] kitchen_timer open end.
+[  134.346727] kitchen_timer read start.
+[  134.346727] kitchen_timer read end.
+[  134.347727] kitchen_timer read start.
+[  134.347727] kitchen_timer read end.
+[  134.347727] kitchen_timer close.
+[  137.675220] TIMER ALARM!!!
+\end{lstlisting}
+
+次に、タイマーの値として負の数値を設定してみる。
+
+\begin{lstlisting}[label=devdrv_exec3,caption=タイマーに負の値を設定する,language=sh]
+[root@archlinux dev]# echo -10 > kitchen
+-bash: echo: write error: Bad address
+\end{lstlisting}
+
+\texttt{write error}と表示される。
+カーネルメッセージを確認すると、Listing\ref{devdrv_exec4}のように表示される。
+
+\begin{lstlisting}[label=devdrv_exec4,caption=負の値を設定した時のカーネルメッセージ,language=sh]
+[  742.556265] kitchen_timer open start.
+[  742.556265] kitchen_timer open end.
+[  742.556265] kitchen_timer write start.
+[  742.556265] mybuf: -10
+
+[  742.556265] error: bad second setting
+[  742.556265] kitchen_timer close.
+\end{lstlisting}
+
+次に、タイマーに渡す値を英文字にしてみる。
+
+\begin{lstlisting}[label=devdrv_exec5,caption=タイマーに英文字を設定する,language=sh]
+[root@archlinux dev]# echo aaa > kitchen
+-bash: echo: write error: Bad address
+\end{lstlisting}
+
+\texttt{write error}と表示される。
+カーネルメッセージを確認すると、Listing\ref{devdrv_exec6}のように表示される。
+
+\begin{lstlisting}[label=devdrv_exec6,caption=英文字を設定した時のカーネルメッセージ,language=sh]
+[ 2788.958164] kitchen_timer open start.
+[ 2788.958164] kitchen_timer open end.
+[ 2788.958164] kitchen_timer write start.
+[ 2788.958164] mybuf: aaa
+
+[ 2788.958164] error: kstrtol() while kitchen_timer_write
+[ 2788.960164] kitchen_timer close.
+\end{lstlisting}
 
 \end{document}
