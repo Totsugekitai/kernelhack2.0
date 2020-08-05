@@ -1,7 +1,6 @@
 .RECIPEPREFIX = >
 
 LINUX := linux-5.7.10
-BUILDROOT := buildroot-2020.02.4
 TOOLS := tools
 SHARE := share
 
@@ -22,5 +21,4 @@ debug:
 .PHONY : clean
 clean:
 > make clean -C $(LINUX)
-> make clean -C $(BUILDROOT)
 
