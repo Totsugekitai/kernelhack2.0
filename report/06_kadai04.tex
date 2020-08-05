@@ -1,0 +1,180 @@
+\documentclass[main]{subfiles}
+
+\begin{document}
+
+\section{実験課題4：デバイスドライバの作成}
+
+本課題では、次のような条件を満たすデバイスドライバを作成する。
+
+\begin{itemize}
+ \item \texttt{open()}により、なんらかの初期化を行う
+ \item \texttt{write()}により、データをユーザ空間からコピーする
+ \item \texttt{read()}によりデータをユーザ空間にコピーする
+ \item \texttt{ioctl()}として3つ以上のサブコマンドを持つ。2つのうち1つは内部の状態を設定するもの、もう1つは内部の状態を取得するもの
+ \item これらのシステムコールは、一般ユーザの権限でも実行できるようにすること
+\end{itemize}
+
+\subsection{デバイスドライバの概要}
+\label{intro_devdrv}
+
+まずはデバイスドライバとはどういったものかということと、Linuxでの実装方法について説明する。
+
+\subsubsection{デバイスドライバとは}
+
+デバイスドライバとは、PCに接続されているハードウェアを操作するためのプログラム、というのが元の意味である。
+Linuxでは、デバイスドライバの抽象化インターフェースに沿ったハードウェア操作命令を実装していくことで、ユーザーからの操作を共通化できるようにしている。
+またインターフェースに沿った実装ならハードウェアを操作するためのプログラムでなくてもよく、デバイスドライバといいつつもソフトウェア的な処理だけをするものも作成できる。
+
+\subsubsection{Linuxでのデバイスドライバ実装方法}
+
+Linuxでは、デバイスドライバはカーネルモジュールとして作成する。
+デバイスドライバの骨組みをListing\ref{devicedriver_basic}に示す。
+
+\begin{lstlisting}[label=devicedriver_basic,caption=デバイスドライバの骨組み,language=c]
+static int devdrv_open(struct inode *inode, struct file *file)
+{
+    // open code...
+}
+
+static int devdrv_close(struct inode *inode, struct file *file)
+{
+    // close code...
+}
+
+static ssize_t devdrv_read(struct file *filp, char __user *buf, size_t count, loff_t *offset)
+{
+    // read code...
+}
+
+static ssize_t devdrv_write(struct file *filp, const char __user *buf, size_t count, loff_t *offset)
+{
+    // write code...
+}
+
+static long devdrv_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+{
+    // ioctl code...
+}
+
+const struct file_operations devdrv_fops = {
+    .open  = devdrv_open,
+    .close = devdrv_close,
+    .read  = devdrv_read,
+    .write = devdrv_write,
+    .ioctl = devdrv_ioctl,
+};
+
+static int devdrv_init(void)
+{
+    // module init code...
+}
+
+static void devdrv_exit(void)
+{
+    // module init code...
+}
+
+module_init(devdrv_init);
+module_exit(devdrv_exit);
+\end{lstlisting}
+
+Listing\ref{devicedriver_basic}を観察すると、\texttt{file\_operations}構造体にインターフェースに沿った処理を登録していくことで、デバイスドライバを実現している。
+またここでは省略されているが、変数\texttt{devdrv\_fops}を\texttt{devdrv\_init()}内部でカーネルが提供する適切な初期化関数に適用することによって、デバイスドライバとして登録される。
+
+\subsection{キャラクタデバイスドライバの実装}
+
+\ref{intro_devdrv}節を踏まえて、秒数を入力するとその秒数後にカーネルメッセージが出力される、キャラクタ型のデバイスドライバを実装した。
+\texttt{open()}でタイマの初期化、\texttt{write()}でタイマのセット、\texttt{read()}で残り時間の表示を行う、\texttt{ioctl()}ではタイマ時間の延長・パラメタの取得・タイマの中断と解放が行える。
+
+\subsubsection{実装本体}
+
+Listing\ref{kitchen}に実装を示す。
+Listing\ref{kitchen_header}はヘッダファイルである。
+
+\lstinputlisting[label=kitchen_header,caption=ヘッダファイル,language=c]{../linux-5.7.10/totsugeki/my_module.h}
+\lstinputlisting[label=kitchen,caption=実装したキャラクタ型デバイスドライバ,language=c]{../linux-5.7.10/totsugeki/my_module.c}
+
+各処理の解説をする。
+
+まず\texttt{kitchen\_struct}構造体型の静的変数\texttt{kitchen}を用意し、ここに情報を記録して情報の受け渡しを行うことに注意する。
+\texttt{.start\_time}メンバには、タイマーの動作が開始した時刻を記録する。
+\texttt{.timer}メンバは\texttt{timer\_list}構造体型であり、\texttt{<linux/timer.h>}で定義されている。
+この構造体は、Linuxのタイマ機能を用いるために必要なものである。
+\texttt{.timer.entry}は複数のタイマを管理するためのポインタである、今回は使用しない。
+\texttt{.timer.expires}は何秒後にタイマを動作させるかを決める値である、単位が独自のものなので注意する。
+\texttt{.timer.function}は規定秒数がたった後に行われる処理を登録するメンバである、最初は\texttt{NULL}にしておく。
+\texttt{.timer.flags}はフラグである、今回は用いない。
+
+\texttt{open()}に対応する処理は\texttt{kitchen\_timer\_open()}である。
+静的変数\texttt{kitchen}を初期化し、引数で受け取った\texttt{file}構造体の\texttt{private\_data}メンバに\texttt{kitchen}変数のアドレスを格納する処理をする。
+デバイスドライバの実装では、\texttt{file->private\_data}メンバにデータを格納してデータの受け渡しを行うことができる。
+
+\texttt{close()}に対応する処理は\texttt{kitchen\_timer\_close()}である。
+\texttt{kitchen\_timer\_close()}自体は何もしない関数である。
+
+\texttt{read()}に対応する処理は\texttt{kitchen\_timer\_read()}である。
+第1引数は\texttt{private\_data}メンバから\texttt{kitchen\_struct}構造体を受け取るために用いる。
+第2引数でユーザー空間から文字列を受け取り、第3引数で文字列長を検査する。
+第4引数は文字列をどこまで読み込んだか覚えておくものである。
+まず最初に文字列長をチェックして\texttt{byte}変数に格納し、\texttt{filp}から静的変数\texttt{kitchen}の情報を取り出して各変数に格納する。
+\texttt{kitchen.timer.expires}に残り時間が記録されているので、それが\texttt{0}かどうかで処理を分ける。
+\texttt{0}だった場合は、\texttt{timer not set}という文字列をユーザー空間にコピーし、\texttt{bytes}変数や\texttt{offset}変数を計算し直して\texttt{bytes}変数の値をリターンする。
+残り時間が\texttt{0}以外だった場合は残り時間を表示する処理をする。
+計算した残り時間を文字列としてユーザー空間にコピーして、\texttt{bytes}変数と\texttt{offset}変数を計算し直して、\texttt{bytes}変数をリターンする。
+
+\texttt{write()}に対応する処理は\texttt{kitchen\_timer\_write()}である。
+引数に関しては\texttt{kitchen\_timer\_read()}と同じである。
+最初に文字列長をチェックして\texttt{bytes}変数に格納して、バッファの初期化や\texttt{filp->private\_data}からデータを取り出す作業を行う。
+\texttt{count}変数が大きすぎる、つまり文字数が大きすぎるときにはエラーを返す。
+具体的には18桁を超える数字が\texttt{write()}されたらエラーを返す。
+ユーザー空間から文字列をコピーし、エラー処理をしつつ文字列を\texttt{kstrtol()}を用いて\texttt{long}型に変換し、変数\texttt{k}に時刻をセットしてそれをタイマーにセットする。
+最後に\texttt{offset}変数を計算し直して、\texttt{count}変数の値をリターンする。
+
+\texttt{ioctl()}に対応する処理は\texttt{kitchen\_timer\_ioctl()}である。
+最初に必要な数値を計算しておく。
+\texttt{cmd}引数からどの操作をするかの情報が渡ってくるので、\texttt{switch}文で分岐させる。
+\texttt{cmd == KITCHEN\_TIMER\_EXTEND\_VALUES}のときは、まず引数\texttt{arg}を用いてユーザー空間からデータをコピーする。
+次にタイマーがセットされていたら、タイマーの時間を延長する処理を行う。
+タイマーがセットされているかどうかは、タイマーに関数がセットされているかどうかで判定を行う。
+\texttt{cmd == KITCHEN\_TIMER\_GET\_VALUES}のときは、まずタイマーがセットされているかを確認し、セットされていたら変数\texttt{val}に必要な値を代入する、タイマーがセットされていなかったら\texttt{val}は\texttt{0}で埋めておく。
+そうしたら変数\texttt{val}をユーザー空間にコピーする。
+\texttt{cmd == KITCHEN\_TIMER\_RELEASE\_TIMER}のときは、引数\texttt{arg}を用いてユーザー空間からデータを変数\texttt{val}にコピーし、\texttt{val}の値を検査する。
+\texttt{val.release\_flag}が\texttt{1}だったらタイマーを削除し、静的変数\texttt{kitchen}も初期化する。
+\texttt{val.release\_flag}がそれ以外だったら、何もしない。
+これらの分岐処理が終わったら、最後に\texttt{0}をリターンする。
+
+これらの処理を\texttt{file\_operations}構造体型の定数\texttt{kitchen\_fops}に登録する。
+
+モジュールが読み込まれる際に呼び出される関数を\texttt{kitchen\_timer\_init()}として定義する。
+\texttt{alloc\_chrdev\_region()}でキャラクタ型デバイスドライバの領域を確保し、\texttt{cdev\_init()}と\texttt{cdev\_add()}でデバイスドライバとして登録する。
+成功したら\texttt{0}をリターンする。
+
+モジュールが削除される際に呼び出される関数を\texttt{kitchen\_timer\_exit()}として定義する。
+\texttt{cdev\_del()}でデバイスドライバの削除を、\texttt{unregister\_chrdev\_region()}でデバイスドライバ領域を削除する。
+
+最後に\texttt{module\_init()}と\texttt{module\_exit()}でモジュールが読み込まれる際と削除される際に行われる処理を登録する。
+\texttt{module\_init()}には\texttt{kitchen\_timer\_init()}を、\texttt{module\_exit()}には\texttt{kitchen\_timer\_exit()}を登録する。
+
+\subsubsection{コンパイルと\texttt{Kconfig}の変更}
+
+作業ディレクトリにListing\ref{kconfig}のように\texttt{Kconfig}ファイルを追加する。
+
+\lstinputlisting[label=kconfig,caption=\texttt{Kconfig}]{../linux-5.7.10/totsugeki/Kconfig}
+
+このように追記することで、\texttt{meke menuconfig}をした際にコンフィグが表示されるようになる。
+
+\texttt{Makefile}にはListing\ref{module_make}のように追記する。
+通常のモジュールの場合は\texttt{obj-m}に追記する形でファイルを追加する。
+コンフィグと合わせたい場合は、\texttt{obj-\$(CONFIG\_*)}に追記する形でファイルを追加する。
+
+\begin{lstlisting}[label=module_make,caption=モジュールの\texttt{make},language=make]
+obj-$(CONFIG_KITCHEN_TIMER) += my_module.o
+\end{lstlisting}
+
+また、\texttt{menuconfig}で\texttt{KITCHEN\_TIMER}を有効化しておくと、カーネルに組み込まれる。
+
+\subsubsection{ゲストでのデバイスドライバの実行}
+
+
+
+\end{document}
