@@ -1,0 +1,36 @@
+#include <signal.h>
+
+BEGIN
+{
+        printf("Tracing ext4 write latency... Hlt Ctrl-C to end.\n");
+        printf("%-8s %-6s %-8s %-10s %-12s %-8s\n", "TIME", "PID", "DEVICE", "INODE", "LEN", "LATENCY");
+}
+
+tracepoint:ext4:ext4_da_write_begin
+{
+        @start[tid] = nsecs;
+        @dev[tid] = args->dev;
+        @ino[tid] = args->ino;
+        @len[tid] = args->len;
+}
+
+tracepoint:ext4:ext4_da_write_end
+/@start[tid] != 0/
+{
+        $latms = (nsecs - @start[tid]) / 1000000;
+        time("%H:%M:%S ");
+        printf("%-6d %-8d %-10lu %-12u %-8lu\n", pid, @dev[tid], @ino[tid], @len[tid], $latms);
+
+        delete(@start[tid]);
+        delete(@dev[tid]);
+        delete(@ino[tid]);
+        delete(@len[tid]);
+}
+
+END
+{
+        clear(@start);
+        clear(@dev);
+        clear(@ino);
+        clear(@len);
+}

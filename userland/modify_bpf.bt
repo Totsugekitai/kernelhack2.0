@@ -1,0 +1,18 @@
+#include <sys/types.h>
+
+tracepoint:raw_syscalls:sys_enter
+{
+    @syscall_id[tid] = args->id;
+}
+
+tracepoint:raw_syscalls:sys_exit
+/comm != "bpftrace" && comm != "bash"/
+{
+    printf("%-6d %-16s %-10ld\n", pid, comm, @syscall_id[tid]);
+    delete(@syscall_id[tid]);
+}
+
+END
+{
+    clear(@syscall_id);
+}
