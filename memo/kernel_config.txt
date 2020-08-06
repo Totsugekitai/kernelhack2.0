@@ -20,3 +20,8 @@ VIRTIO_PCI = y
 
 /* Fuse FS config */
 FUSE_FS = y
+
+/* eBPF support */
+BPF = y
+BPF_JIT = y
+BPF_SYSCALL = y
