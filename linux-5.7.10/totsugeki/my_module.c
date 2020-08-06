@@ -219,6 +219,8 @@ static long kitchen_timer_ioctl(struct file *filp, unsigned int cmd, unsigned lo
             } else {
                 printk(KERN_WARNING "kitchen timer module no such timer to release\n");
             }
+        } else {
+            printk(KERN_WARNING "kitchen timer module release flag is zero\n");
         }
         break;
     default:
