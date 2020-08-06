@@ -10,7 +10,7 @@
 
 GDBは、Listing\ref{gdb_comm}のように用いる。
 
-\begin{lstlisting}[label=gdb_comm,caption=GDBの使用の様子,language=sh]
+\begin{lstlisting}[label=gdb_comm,caption=GDBの使用の様子]
 $ cd /path/to/linux
 $ gdb ./vmlinux
 
@@ -45,7 +45,7 @@ Listing\ref{use_getppid}のC言語で書かれたプログラムを用いて、�
 
 Listing\ref{gdb_getppid}は、Listing\ref{use_getppid}のプログラムをゲスト上でコンパイルし、実行した際のGDBの様子である。
 
-\begin{lstlisting}[label=gdb_getppid,caption=GDBの動作の様子,language=sh]
+\begin{lstlisting}[label=gdb_getppid,caption=GDBの動作の様子]
 (gdb) target remote :1234
 Remote debugging using :1234
 default_idle () at arch/x86/kernel/process.c:676

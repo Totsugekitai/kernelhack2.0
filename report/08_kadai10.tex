@@ -1,0 +1,52 @@
+\documentclass[main]{subfiles}
+
+\begin{document}
+
+\section{実験課題10：その他 - eBPFを用いたトレース}
+
+この課題では、カーネルの機能であるeBPFを用いたカーネル内の処理のトレースを行う。
+
+\subsection{eBPFの概要}
+
+まずはeBPFの概要を記す。
+
+\subsubsection{eBPFとは}
+
+eBPFは extended Berkeley Packet Filter の頭文字を取ったもので、パケットフィルタとして開発されたBPFを拡張して作られた機能である。
+カーネル内の様々な関数・システムコール・処理をトレースすることができる。
+またカーネル内で動作する仮想マシンの中でBPFアプリケーションは動くため、比較的安全性が高い。
+
+\subsection{トレーサーの実装と実行結果}
+
+今回はシステムコールのトレーサーを作成した。
+
+\subsubsection{トレーサーの実装}
+
+Listing\ref{tracer}にプログラムを示す。
+
+\lstinputlisting[label=tracer,caption=トレーサーのプログラム]{../userland/modify_bpf.bt}
+
+このトレーサーはプロセスID、プロセス名、システムコール番号を1行に出力する。
+
+\subsubsection{実行結果}
+
+Listing\ref{tracer_exec}のようにトレーサーを実行していくつかコマンドを実行してみる。
+
+\begin{lstlisting}[label=tracer_exec,caption=トレーサーを実行していくつかコマンドを打ってみる]
+[root@archlinux host]# bpftrace modify_bpf.bt > bpf.log &
+[1] 171
+[root@archlinux host]# ls
+a.out  bpf.bt   bpftrace  logfuse.c      module.c     syscall.c  use_getppid
+bcc    bpf.log  logfuse   modify_bpf.bt  my_module.h  test       use_getppid.c
+[root@archlinux host]# cd ..
+[root@archlinux ~]# mkdir empty_dir
+[root@archlinux ~]# kill 171
+\end{lstlisting}
+
+トレースログが\texttt{bpf.log}に出力されるので表示すると、Listing\ref{tracer_log}のようになる。
+
+\lstinputlisting[label=tracer_log,caption=ログ]{../userland/bpf.log}
+
+確かにログが取れていることが分かった。
+
+\end{document}

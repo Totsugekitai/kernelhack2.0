@@ -23,6 +23,14 @@
 \usepackage{hyperref}
 \usepackage{here}
 
+\usepackage[%
+backend = biber,
+bibstyle = ieee,
+]{biblatex}
+%
+\nocite{*}
+\addbibresource{main.bib}
+
 \title{主専攻実験 カーネルハック レポート}
 \author{201811377 広瀬智之}
 \date{\today}
@@ -30,6 +38,9 @@
 \begin{document}
 
 \maketitle
+
+\tableofcontents
+\newpage
 
 \subfile{01_purpose}
 \subfile{02_environment}
@@ -41,5 +52,14 @@
 \subfile{05_kadai03}
 \newpage
 \subfile{06_kadai04}
+\newpage
+\subfile{07_kadai08}
+\newpage
+\subfile{08_kadai10}
+\newpage
+\subfile{09_kansow}
+
+\newpage
+\printbibliography[title=参考文献リスト]
 
 \end{document}

@@ -11,6 +11,7 @@
 使用したOSは\textbf{Linux}、カーネルのバージョンは\textbf{5.7.10}である。
 
 \subsection{カーネルパラメタ}
+\label{kernel_param}
 
 Listing\ref{kernelconf}は、\texttt{make defconfig}で生成したデフォルトのパラメタから変更したものの一部である。
 すべて列挙すると膨大であり、依存関係を把握しきれないため、主要なもののみ抜粋する。
@@ -24,6 +25,8 @@ Listing\ref{kernelconf}は、\texttt{make defconfig}で生成したデフォル�
 \texttt{9P\_FS}と\texttt{PCI}、\texttt{VIRTIO}のパラメタは、ホストとゲスト間で9Pプロトコルを用いてファイル共有を行うために必要なパラメタである。
 
 \texttt{FUSE\_FS}は、\textit{Filesystem in Userpace}機能を用いるために必要なパラメタである。
+
+\texttt{BPF}とついているものは、eBPFの機能を用いるために必要なパラメタである。
 
 \subsection{カーネルのコンパイル}
 

@@ -1,0 +1,246 @@
+\documentclass[main]{subfiles}
+
+\begin{document}
+
+\section{実験課題3：ユーザレベルでのファイルシステムの追加}
+
+本課題では、FUSEを用いてユーザレベルのプログラムで新たなファイルシステムを追加する。
+
+\subsection{FUSEの概要}
+\label{about_fuse}
+
+\subsubsection{FUSEとは}
+
+\textit{FUSE(Filesystem in Userspace)}はカーネルを修正することなく、ユーザレベルでのプログラムでファイルシステムを作成することができるLinuxの機能の一つである。
+FUSEのAPIに沿った命令を実装していくことで、ファイルシステムを構築できる。
+
+FUSEを用いるためには、カーネルコンフィグで\texttt{CONFIG\_FUSE\_FS}を\texttt{y}にする必要がある\footnote{\ref{kernel_param}節を参照}。
+
+\subsubsection{FUSEで実装するAPI}
+
+\texttt{/usr/include/fuse3/fuse.h}で定義される\texttt{fuse\_operations}構造体に、ユーザーが実装する命令が載っている。
+Listing\ref{fuse_operations}に示す。
+
+\begin{lstlisting}[label=fuse_operations,caption=fuseの命令一覧,language=c]
+ struct fuse_operations {
+         int (*getattr) (const char *, struct stat *, struct fuse_file_info *fi);
+ 
+         int (*readlink) (const char *, char *, size_t);
+ 
+         int (*mknod) (const char *, mode_t, dev_t);
+ 
+         int (*mkdir) (const char *, mode_t);
+ 
+         int (*unlink) (const char *);
+ 
+         int (*rmdir) (const char *);
+ 
+         int (*symlink) (const char *, const char *);
+ 
+         int (*rename) (const char *, const char *, unsigned int flags);
+ 
+         int (*link) (const char *, const char *);
+ 
+         int (*chmod) (const char *, mode_t, struct fuse_file_info *fi);
+ 
+         int (*chown) (const char *, uid_t, gid_t, struct fuse_file_info *fi);
+ 
+         int (*truncate) (const char *, off_t, struct fuse_file_info *fi);
+ 
+         int (*open) (const char *, struct fuse_file_info *);
+ 
+         int (*read) (const char *, char *, size_t, off_t,
+                      struct fuse_file_info *);
+ 
+         int (*write) (const char *, const char *, size_t, off_t,
+                       struct fuse_file_info *);
+ 
+         int (*statfs) (const char *, struct statvfs *);
+ 
+         int (*flush) (const char *, struct fuse_file_info *);
+ 
+         int (*release) (const char *, struct fuse_file_info *);
+ 
+         int (*fsync) (const char *, int, struct fuse_file_info *);
+ 
+         int (*setxattr) (const char *, const char *, const char *, size_t, int);
+ 
+         int (*getxattr) (const char *, const char *, char *, size_t);
+ 
+         int (*listxattr) (const char *, char *, size_t);
+ 
+         int (*removexattr) (const char *, const char *);
+ 
+         int (*opendir) (const char *, struct fuse_file_info *);
+ 
+         int (*readdir) (const char *, void *, fuse_fill_dir_t, off_t,
+                         struct fuse_file_info *, enum fuse_readdir_flags);
+ 
+         int (*releasedir) (const char *, struct fuse_file_info *);
+ 
+         int (*fsyncdir) (const char *, int, struct fuse_file_info *);
+ 
+         void *(*init) (struct fuse_conn_info *conn,
+                        struct fuse_config *cfg);
+ 
+         void (*destroy) (void *private_data);
+ 
+         int (*access) (const char *, int);
+ 
+         int (*create) (const char *, mode_t, struct fuse_file_info *);
+ 
+         int (*lock) (const char *, struct fuse_file_info *, int cmd,
+                      struct flock *);
+ 
+          int (*utimens) (const char *, const struct timespec tv[2],
+                          struct fuse_file_info *fi);
+ 
+         int (*bmap) (const char *, size_t blocksize, uint64_t *idx);
+ 
+         int (*ioctl) (const char *, unsigned int cmd, void *arg,
+                       struct fuse_file_info *, unsigned int flags, void *data);
+ 
+         int (*poll) (const char *, struct fuse_file_info *,
+                      struct fuse_pollhandle *ph, unsigned *reventsp);
+ 
+         int (*write_buf) (const char *, struct fuse_bufvec *buf, off_t off,
+                           struct fuse_file_info *);
+ 
+         int (*read_buf) (const char *, struct fuse_bufvec **bufp,
+                          size_t size, off_t off, struct fuse_file_info *);
+         int (*flock) (const char *, struct fuse_file_info *, int op);
+ 
+         int (*fallocate) (const char *, int, off_t, off_t,
+                           struct fuse_file_info *);
+ 
+         ssize_t (*copy_file_range) (const char *path_in,
+                                     struct fuse_file_info *fi_in,
+                                     off_t offset_in, const char *path_out,
+                                     struct fuse_file_info *fi_out,
+                                     off_t offset_out, size_t size, int flags);
+ 
+         off_t (*lseek) (const char *, off_t off, int whence, struct fuse_file_info *);
+ };
+\end{lstlisting}
+
+ユーザーはこの命令を実装していくが、実装しない命令があっても良い\footnote{実装していない命令が発行された場合はFUSEがエラーを返す}。
+
+\subsection{独自ファイルシステムの実装と実行結果}
+
+\subsubsection{実装}
+
+\ref{about_fuse}節を参考に、アクセスするとログが取られる独自ファイルシステムを実装した。
+このファイルシステムは、内部に疑似テキストファイルを1つ持ち、ファイルシステムにアクセスしたり、テキストファイルを\texttt{read()}したりすると、\texttt{/tmp/log}にログが取られるようになっている。
+
+Listing\ref{impl_fuse}に実装を示す。
+
+\lstinputlisting[label=impl_fuse,caption=実装したファイルシステム,language=c]{../userland/logfuse.c}
+
+解説を記す。
+
+実装した命令は次の6つである。
+
+\begin{itemize}
+ \item \texttt{init}
+ \item \texttt{getattr}
+ \item \texttt{readdir}
+ \item \texttt{open}
+ \item \texttt{read}
+ \item \texttt{destroy}
+\end{itemize}
+
+\texttt{init}に対応する処理は\texttt{logfuse\_init}である。
+引数から渡ってきた\texttt{cfg}の\texttt{kernel\_cache}メンバを\texttt{1}にして、アクセスログを\texttt{write\_log()}関数で記録している。
+
+\texttt{getattr}に対応する処理は\texttt{logfuse\_getattr}である。
+FUSEのルートディレクトリと、疑似テキストファイルの情報を返し、ログを書き込む処理をしている。
+
+\texttt{readdir}に対応する処理は\texttt{logfuse\_readdir}である。
+FUSEのルートディレクトリを\texttt{readdir}した時の処理を記述して、ログを書き込む処理をしている。
+ルートディレクトリ以外には対応していない。
+
+\texttt{open}に対応する処理は\texttt{logfuse\_open}である。
+疑似テキストファイルのみに対応し、疑似テキストファイルが指定されるとログを書き込む。
+
+\texttt{read}に対応する処理は\texttt{logfuse\_read}である。
+疑似テキストファイルのみに対応し、疑似テキストファイルの内容を\texttt{read}して、ログを書き込む処理をしている。
+
+\texttt{destroy}に対応する処理は\texttt{logfuse\_destroy}である。
+この処理はログを取るのみである。
+
+これらの処理群を\texttt{fuse\_operations}構造体型の静的定数\texttt{hello\_oper}に登録する。
+
+最後に\texttt{main}関数でFUSEを起動する。
+疑似テキストファイルのファイル名とファイルの内容を指定する。
+ここではファイル名は\texttt{logstamp}、ファイルの内容は\texttt{stamp!!!{\textbackslash}n}とした。
+
+\texttt{fuse\_main}関数でfuseを起動する。
+\texttt{fuse\_main}関数を抜けたら\texttt{fuse\_opt\_free\_args}で引数を開放して、終了する。
+
+\subsubsection{実行結果}
+
+Listing\ref{fuse_compile}のようにしてコンパイルする。
+
+\begin{lstlisting}[label=fuse_compile,caption=FUSEのコンパイル]
+[root@chlinux host]# gcc -Wall logfuse.c `pkg-config fuse3 --cflags --libs` -o logfuse
+\end{lstlisting}
+
+実行はListing\ref{fuse_mount}のようにしてディレクトリを指定して実行する。
+
+\begin{lstlisting}[label=fuse_mount,caption=マウントする]
+[root@archlinux ~]# ./host/logfuse logfs_mountpoint/
+[1] 186
+\end{lstlisting}
+
+これで\texttt{logfs\_mountpoint/}にFUSEがマウントされた。
+
+一通りの動作を実行してみた結果がListing\ref{fuse_exec}である。
+
+\begin{lstlisting}[label=fuse_exec,caption=FUSEの動作確認]
+[root@archlinux ~]# ls logfs_mountpoint/
+logstamp
+[root@archlinux ~]# cat logfs_mountpoint/logstamp 
+stamp!!!
+[root@archlinux ~]# ls -la logfs_mountpoint/
+total 4
+drwxr-xr-x 2 root root    0 Jan  1  1970 .
+drwxr-x--- 6 root root 4096 Aug  6 08:13 ..
+-r--r--r-- 1 root root    9 Jan  1  1970 logstamp
+\end{lstlisting}
+
+適切に動作している。
+
+\texttt{/tmp/log}に記されたログの結果がListing\ref{fuse_log}である。
+
+\begin{lstlisting}[label=fuse_log,caption=ログ]
+[root@archlinux ~]# cat /tmp/log 
+[1596702513] logfuse init.
+[1596702524] logfuse getattr.
+[1596702525] logfuse readdir.
+[1596702530] logfuse getattr.
+[1596702532] logfuse getattr.
+[1596702532] logfuse readdir.
+[1596702532] logfuse getattr.
+[1596702532] logfuse getattr.
+[1596702533] logfuse open.
+[1596702533] logfuse read.
+[1596702545] logfuse getattr.
+[1596702546] logfuse readdir.
+[1596702546] logfuse getattr.
+[1596702621] logfuse getattr.
+[1596702624] logfuse getattr.
+[1596702624] logfuse readdir.
+[1596702624] logfuse getattr.
+[1596702624] logfuse getattr.
+[1596702633] logfuse getattr.
+[1596702657] logfuse getattr.
+[1596702657] logfuse readdir.
+[1596702657] logfuse getattr.
+[1596702657] logfuse getattr.
+[1596703322] logfuse getattr.
+[1596703323] logfuse destroy.
+\end{lstlisting}
+
+このようにログが書き込まれているのがわかる。
+
+\end{document}
