@@ -86,30 +86,35 @@ static ssize_t kitchen_timer_read(struct file *filp, char __user *buf, size_t co
 
     if (kitchen.timer.expires == 0) {
         char c[20] = {0};
-        snprintf(c, sizeof("timer not set\n"), "timer not set\n");
-        if (copy_to_user(buf, c, strlen(c))) {
+        snprintf(c, sizeof(c), "timer not set\n");
+        if (copy_to_user(buf, &c[(*offset)], bytes)) {
             return -EFAULT;
         }
         printk(KERN_INFO "kitchen_timer read end.\n");
         printk(KERN_INFO "%ld\n", count);
         bytes = sizeof(c) - (MAX_MSG_LEN - (MAX_MSG_LEN - (*offset)));
-        (*offset) += sizeof(c);
+        (*offset) += bytes;
         return bytes;
     }
     char b[40] = {0};
     snprintf(b, sizeof(b), "%ld second passed\n", elapsed_time);
-    if (copy_to_user(buf, b, strlen(b))) {
+    if (copy_to_user(buf, &b[(*offset)], bytes)) {
         return -EFAULT;
     }
 
     printk(KERN_INFO "kitchen_timer read end.\n");
     bytes = sizeof(b) - (MAX_MSG_LEN - (MAX_MSG_LEN - (*offset)));
-    (*offset) += sizeof(b);
+    (*offset) += bytes;
     return bytes;
 }
 
 static ssize_t kitchen_timer_write(struct file *filp, const char __user *buf, size_t count, loff_t *offset)
 {
+    if (*offset != 0) {
+        printk(KERN_ERR "*offset is not zero\n");
+        return -EINVAL;
+    }
+
     ssize_t bytes = count < (MAX_MSG_LEN-(*offset)) ? count : (MAX_MSG_LEN-(*offset));
     printk(KERN_INFO "kitchen_timer write start.\n");
 
@@ -131,8 +136,8 @@ static ssize_t kitchen_timer_write(struct file *filp, const char __user *buf, si
 
     printk(KERN_INFO "mybuf: %s\n", mybuf);
 
-    if (mybuf[strlen(mybuf) - 1] == '\n') {
-        mybuf[strlen(mybuf) - 1] = '\0';
+    if (mybuf[sizeof(mybuf) - 1] != '\0') {
+        mybuf[sizeof(mybuf) - 1] = '\0';
     }
 
     if (kstrtol(mybuf, 0, &setting_second) != 0) {
@@ -155,7 +160,7 @@ static ssize_t kitchen_timer_write(struct file *filp, const char __user *buf, si
     add_timer(&k->timer);
     printk(KERN_INFO "kitchen_timer write end.\n");
     bytes = sizeof(count) - (MAX_MSG_LEN - (MAX_MSG_LEN - (*offset)));
-    (*offset) += sizeof(count);
+    (*offset) += bytes;
     return count;
 }
 

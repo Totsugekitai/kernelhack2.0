@@ -19,6 +19,7 @@
  */
 
 
+#include <sys/types.h>
 #define FUSE_USE_VERSION 31
 
 #include <fuse.h>
@@ -30,6 +31,10 @@
 #include <stddef.h>
 #include <assert.h>
 #include <time.h>
+#include <linux/kernel.h>
+
+static struct stat rootstat;
+static struct stat filestat;
 
 /*
  * Command line options
@@ -56,7 +61,7 @@ static const struct fuse_opt option_spec[] = {
 
 static void write_log(const char *s)
 {
-    FILE *fp = fopen("/tmp/log", "a+");
+    FILE *fp = fopen("/tmp/log", "a");
     if (fp == NULL) {
         printf("cannot open\n");
         exit(1);
@@ -68,13 +73,58 @@ static void write_log(const char *s)
     fclose(fp);
 }
 
+static void file_init(void)
+{
+    time_t t;
+    filestat.st_mode = S_IFREG | 0444;
+    filestat.st_nlink = 1;
+    filestat.st_size = strlen(options.contents);
+    filestat.st_atim.tv_sec = time(&t);
+    filestat.st_mtim.tv_sec = t;
+    filestat.st_ctim.tv_sec = t;
+
+    rootstat.st_mode = S_IFDIR | 0755;
+    rootstat.st_nlink = 2;
+    rootstat.st_mtim.tv_sec = t;
+}
+
 static void *logfuse_init(struct fuse_conn_info *conn,
                         struct fuse_config *cfg)
 {
     (void) conn;
     cfg->kernel_cache = 1;
+
+    file_init();
     write_log("logfuse init.\n");
     return NULL;
+}
+
+void write_file(struct stat *stbuf)
+{
+    FILE *fp = fopen("/var/log/fuse.log", "a+");
+    if (fp == NULL) {
+        return;
+    }
+
+    fprintf(fp, "===========================\n");
+    fprintf(fp, "stbuf->st_dev:          %lu\n", stbuf->st_dev);
+    fprintf(fp, "stbuf->st_ino:          %lu\n", stbuf->st_ino);
+    fprintf(fp, "stbuf->st_mode:         %u\n", stbuf->st_mode);
+    fprintf(fp, "stbuf->st_nlink:        %lu\n", stbuf->st_nlink);
+    fprintf(fp, "stbuf->st_uid:          %u\n", stbuf->st_uid);
+    fprintf(fp, "stbuf->st_gid:          %u\n", stbuf->st_gid);
+    fprintf(fp, "stbuf->st_rdev:         %ld\n", stbuf->st_rdev);
+    fprintf(fp, "stbuf->st_size:         %lu\n", stbuf->st_size);
+    fprintf(fp, "stbuf->st_blksize:      %ld\n", stbuf->st_blksize);
+    fprintf(fp, "stbuf->st_blocks:       %ld\n", stbuf->st_blocks);
+    fprintf(fp, "stbuf->st_atim.tv_nsec: %ld\n", stbuf->st_atim.tv_nsec);
+    fprintf(fp, "stbuf->st_atim.tv_sec:  %ld\n", stbuf->st_atim.tv_sec);
+    fprintf(fp, "stbuf->st_mtim.tv_nsec: %ld\n", stbuf->st_mtim.tv_nsec);
+    fprintf(fp, "stbuf->st_mtim.tv_sec:  %ld\n", stbuf->st_mtim.tv_sec);
+    fprintf(fp, "stbuf->st_ctim.tv_nsec: %ld\n", stbuf->st_ctim.tv_nsec);
+    fprintf(fp, "stbuf->st_ctim.tv_sec:  %ld\n", stbuf->st_ctim.tv_sec);
+
+    fclose(fp);
 }
 
 static int logfuse_getattr(const char *path, struct stat *stbuf, struct fuse_file_info *fi)
@@ -84,12 +134,16 @@ static int logfuse_getattr(const char *path, struct stat *stbuf, struct fuse_fil
 
     memset(stbuf, 0, sizeof(struct stat));
     if (strcmp(path, "/") == 0) {
-        stbuf->st_mode = S_IFDIR | 0755;
-        stbuf->st_nlink = 2;
+        stbuf->st_mode = rootstat.st_mode;
+        stbuf->st_nlink = rootstat.st_nlink;
+        stbuf->st_mtim.tv_sec = rootstat.st_mtim.tv_sec;
     } else if (strcmp(path+1, options.filename) == 0) {
-        stbuf->st_mode = S_IFREG | 0444;
-        stbuf->st_nlink = 1;
-        stbuf->st_size = strlen(options.contents);
+        stbuf->st_mode = filestat.st_mode;
+        stbuf->st_nlink = filestat.st_nlink;
+        stbuf->st_size = filestat.st_size;
+        stbuf->st_atim.tv_sec = filestat.st_atim.tv_sec;
+        stbuf->st_mtim.tv_sec = filestat.st_mtim.tv_sec;
+        stbuf->st_ctim.tv_sec = filestat.st_mtim.tv_sec;
     } else
         res = -ENOENT;
 
@@ -136,6 +190,8 @@ static int logfuse_read(const char *path, char *buf, size_t size, off_t offset,
 {
     size_t len;
     (void) fi;
+    time_t t;
+
     if(strcmp(path+1, options.filename) != 0)
         return -ENOENT;
 
@@ -144,9 +200,11 @@ static int logfuse_read(const char *path, char *buf, size_t size, off_t offset,
         if (offset + size > len)
             size = len - offset;
         memcpy(buf, options.contents + offset, size);
-    } else
+    } else {
         size = 0;
+    }
 
+    filestat.st_atim.tv_sec = time(&t);
     write_log("logfuse read.\n");
 
     return size;
@@ -173,7 +231,7 @@ static void show_help(const char *progname)
            "    --name=<s>          Name of the \"hello\" file\n"
            "                        (default: \"hello\")\n"
            "    --contents=<s>      Contents \"hello\" file\n"
-           "                        (default \"Hello, World!\\n\")\n"
+           "                        (default \"Hellop, World!\\n\")\n"
            "\n");
 }
 

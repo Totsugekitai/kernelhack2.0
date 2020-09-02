@@ -8,11 +8,12 @@
 
 long do_sys_hello(const char __user *readbuf, char __user *writebuf, unsigned long len)
 {
+    char str[] = "syscall hello!!\n";
     int slen;
     char buf[HELLO_MAX_LEN];
     long retval;
+    slen = sizeof(str);
 
-    slen = sizeof("syscall hello!!\n");
     if (!access_ok(readbuf, len)) {
         return -EINVAL;
     }
@@ -26,7 +27,11 @@ long do_sys_hello(const char __user *readbuf, char __user *writebuf, unsigned lo
     if (copy_from_user(buf, readbuf, len)) {
         return -EFAULT;
     }
-    strcat(buf, "syscall hello!!\n");
+    if (len + slen > HELLO_MAX_LEN) {
+        printk(KERN_ERR "user string is too long\n");
+        return -EINVAL;
+    }
+    strcat(buf, str);
     retval = len + slen;
     if (copy_to_user(writebuf, buf, retval)) {
         return -EFAULT;
